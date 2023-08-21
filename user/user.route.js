@@ -8,6 +8,7 @@ const router = express.Router();
 router.post("/user/register", registerUser);
 
 // login user
-router.get("/user/login", loginUser);
+// !if we have body in req.. then it cannot be get request
+router.post("/user/login", loginUser);
 
 export default router;
