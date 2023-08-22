@@ -1,6 +1,8 @@
 import express from "express";
 import { dbConnect } from "./db.connect.js";
 import userRoutes from "./user/user.route.js";
+import categoryRoutes from "./category/category.routes.js";
+
 const app = express();
 
 // to make express understand json
@@ -31,6 +33,7 @@ dbConnect();
 
 // register routes
 app.use(userRoutes);
+app.use(categoryRoutes);
 
 const port = process.env.API_PORT;
 
