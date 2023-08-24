@@ -15,6 +15,7 @@ export const registerUser = async (req, res) => {
   try {
     await userValidationSchema.validateAsync(newUser);
   } catch (error) {
+    // terminate
     return res.status(400).send({ message: error.message });
   }
 
@@ -27,6 +28,7 @@ export const registerUser = async (req, res) => {
       .status(409)
       .send({ message: "User with this email already exists in our system." });
   }
+
   // password => hash using bcrypt
   const hashedPassword = await bcrypt.hash(newUser.password, 8);
 
@@ -61,7 +63,7 @@ export const loginUser = async (req, res) => {
 
   // compare password from req.body with hashed password in database
   const passwordMatch = await bcrypt.compare(
-    loginCredentials.password, //normal password
+    loginCredentials.password, //plain password
     user.password //hashed password
   );
 

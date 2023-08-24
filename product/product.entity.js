@@ -43,11 +43,22 @@ const productSchema = new mongoose.Schema({
     ref: "User",
   },
 
-  categoryId: {
-    type: mongoose.ObjectId,
-    ref: "Category",
+  category: {
+    type: String,
+    required: true,
+    trim: true,
+    enum: [
+      "grocery",
+      "kitchen",
+      "clothing",
+      "electronics",
+      "furniture",
+      "cosmetics",
+      "bakery",
+      "liquor",
+    ],
   },
 });
 
 // create table
-export const Product = mongoose.model(Product, productSchema);
+export const Product = mongoose.model("Product", productSchema);

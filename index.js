@@ -2,6 +2,7 @@ import express from "express";
 import { dbConnect } from "./db.connect.js";
 import userRoutes from "./user/user.route.js";
 import categoryRoutes from "./category/category.routes.js";
+import productRoutes from "./product/product.route.js";
 
 const app = express();
 
@@ -34,6 +35,7 @@ dbConnect();
 // register routes
 app.use(userRoutes);
 app.use(categoryRoutes);
+app.use(productRoutes);
 
 const port = process.env.API_PORT;
 
