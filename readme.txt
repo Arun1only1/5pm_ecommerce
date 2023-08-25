@@ -1,0 +1,6 @@
+#The env file required are
+API_PORT
+
+MONGO_URL
+
+JWT_ACCESS_TOKEN_SECRET
