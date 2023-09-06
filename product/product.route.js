@@ -25,4 +25,8 @@ router.post("/product/buyer/all", isBuyer, getAllProducts);
 // get products by seller
 router.post("/product/seller/all", isSeller, getSellerProducts);
 
+// edit product
+// seller
+// can edit own product
+
 export default router;

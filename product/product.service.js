@@ -1,11 +1,10 @@
-import mongoose from "mongoose";
+import { checkMongooseIdValidity } from "../utils/utils.js";
 import { Product } from "./product.entity.js";
+import { checkIfProductExists, isOwnerOfProduct } from "./product.functions.js";
 import {
   addProductValidationSchema,
   getAllProductsValidation,
 } from "./product.validation.schema.js";
-import { checkMongooseIdValidity } from "../utils/utils.js";
-import { checkIfProductExists } from "./product.functions.js";
 
 // *add product
 export const addProduct = async (req, res) => {
@@ -20,7 +19,7 @@ export const addProduct = async (req, res) => {
   }
 
   //   add sellerId
-  newProduct.sellerId = req.userInfo._id;
+  newProduct.sellerId = req.loggedInUser._id;
 
   // add product
   await Product.create(newProduct);
@@ -45,7 +44,7 @@ export const deleteProduct = async (req, res) => {
     // check for product existence
     const product = await checkIfProductExists({ _id: productId });
 
-    const loggedInUserId = req.userInfo._id;
+    const loggedInUserId = req.loggedInUser._id;
 
     //   logged in user must be owner of that product
     isOwnerOfProduct(loggedInUserId, product.sellerId);
@@ -99,13 +98,16 @@ export const getAllProducts = async (req, res) => {
     return res.status(400).send({ message: error.message });
   }
 
+  let match = query.searchText
+    ? { name: { $regex: query.searchText, $options: "i" } }
+    : {};
   // find products
   // calculate skip
   const skip = (query.page - 1) * query.limit;
 
   const products = await Product.aggregate([
     {
-      $match: {},
+      $match: match,
     },
     {
       $skip: skip,
@@ -115,28 +117,39 @@ export const getAllProducts = async (req, res) => {
     },
   ]);
 
+  const totalItems = await Product.find({}).count();
+
+  const totalPage = Math.ceil(totalItems / query.limit);
+
   // return products
-  return res.status(200).send(products);
+  return res.status(200).send({ products, totalPage });
 };
 
 // * get seller products
 export const getSellerProducts = async (req, res) => {
   const query = req.body;
 
-  const sellerIdFromAuthMiddleware = req.userInfo._id;
+  const sellerIdFromAuthMiddleware = req.loggedInUser._id;
   try {
     await getAllProductsValidation.validateAsync(query);
   } catch (error) {
     return res.status(400).send({ message: error.message });
   }
 
+  let match = query.searchText
+    ? {
+        sellerId: sellerIdFromAuthMiddleware,
+        name: { $regex: query.searchText, $options: "i" },
+      }
+    : {
+        sellerId: sellerIdFromAuthMiddleware,
+      };
+
   const skip = (query.page - 1) * query.limit;
 
   const products = await Product.aggregate([
     {
-      $match: {
-        sellerId: sellerIdFromAuthMiddleware,
-      },
+      $match: match,
     },
     {
       $skip: skip,
@@ -144,7 +157,22 @@ export const getSellerProducts = async (req, res) => {
     {
       $limit: query.limit,
     },
+    {
+      $project: {
+        name: 1,
+        company: 1,
+        price: 1,
+        category: 1,
+        sellerId: 1,
+      },
+    },
   ]);
 
-  return res.status(200).send(products);
+  const totalProducts = await Product.find({
+    sellerId: sellerIdFromAuthMiddleware,
+  }).count();
+
+  const totalPage = Math.ceil(totalProducts / query.limit);
+
+  return res.status(200).send({ products, totalPage });
 };

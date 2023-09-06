@@ -32,7 +32,7 @@ export const isSeller = async (req, res, next) => {
     }
 
     // add user to req
-    req.userInfo = user;
+    req.loggedInUser = user;
 
     next();
   } catch (error) {
@@ -71,6 +71,9 @@ export const isBuyer = async (req, res, next) => {
     if (user.role !== "buyer") {
       return res.status(401).send({ message: "Unauthorized." });
     }
+
+    // add user to req
+    req.loggedInUser = user;
 
     next();
   } catch (error) {

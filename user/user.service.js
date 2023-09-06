@@ -5,6 +5,7 @@ import {
   loginValidationSchema,
   userValidationSchema,
 } from "./user.validation.js";
+import { Cart } from "../cart/cart.entity.js";
 
 // register user
 export const registerUser = async (req, res) => {

@@ -3,6 +3,7 @@ import { dbConnect } from "./db.connect.js";
 import userRoutes from "./user/user.route.js";
 import categoryRoutes from "./category/category.routes.js";
 import productRoutes from "./product/product.route.js";
+import cartRoutes from "./cart/cart.routes.js";
 
 const app = express();
 
@@ -36,6 +37,7 @@ dbConnect();
 app.use(userRoutes);
 app.use(categoryRoutes);
 app.use(productRoutes);
+app.use(cartRoutes);
 
 const port = process.env.API_PORT;
 
