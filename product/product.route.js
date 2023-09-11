@@ -6,6 +6,7 @@ import {
   getProductDetails,
   getAllProducts,
   getSellerProducts,
+  editProduct,
 } from "./product.service.js";
 
 const router = express.Router();
@@ -28,5 +29,6 @@ router.post("/product/seller/all", isSeller, getSellerProducts);
 // edit product
 // seller
 // can edit own product
+router.put("/product/edit/:id", isSeller, editProduct);
 
 export default router;
