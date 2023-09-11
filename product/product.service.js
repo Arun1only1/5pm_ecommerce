@@ -98,10 +98,31 @@ export const getAllProducts = async (req, res) => {
     return res.status(400).send({ message: error.message });
   }
 
-  let match = query.searchText
-    ? { name: { $regex: query.searchText, $options: "i" } }
-    : {};
-  // find products
+  // match
+  let match = {};
+
+  if (query?.searchText) {
+    match.name = { $regex: query.searchText, $options: "i" };
+  }
+
+  // price
+  let price = {};
+  if (query?.minPrice) {
+    price = { $gte: query.minPrice };
+  }
+  if (query?.maxPrice) {
+    price = { ...price, $lte: query.maxPrice };
+  }
+
+  // category
+  if (query?.category?.length) {
+    match.category = { $in: query.category };
+  }
+
+  if (Object.entries(price).length > 0) {
+    match.price = price;
+  }
+
   // calculate skip
   const skip = (query.page - 1) * query.limit;
 

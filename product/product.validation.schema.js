@@ -26,4 +26,18 @@ export const getAllProductsValidation = Joi.object({
   page: Joi.number().min(1).integer().required(),
   limit: Joi.number().min(1).integer().required(),
   searchText: Joi.string().allow(null, ""),
+  minPrice: Joi.number().min(0),
+  maxPrice: Joi.number().min(0), //TODO:max price dependent on min price
+  category: Joi.array().items(
+    Joi.string().valid(
+      "grocery",
+      "kitchen",
+      "clothing",
+      "electronics",
+      "furniture",
+      "cosmetics",
+      "bakery",
+      "liquor"
+    )
+  ),
 });
