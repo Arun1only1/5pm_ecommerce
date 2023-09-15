@@ -2,6 +2,8 @@ import express from "express";
 import { isBuyer } from "../auth/auth.middleware.js";
 import { Product } from "../product/product.entity.js";
 import { Cart } from "./cart.entity.js";
+import mongoose from "mongoose";
+import { checkMongooseIdValidity } from "../utils/utils.js";
 
 const router = express.Router();
 
@@ -50,14 +52,18 @@ router.put("/cart/remove/item/:id", isBuyer, async (req, res) => {
 
   const productId = req.params.id;
 
-  //   mongo id validation
+  // validate mongo id
+  const isValidMongoId = checkMongooseIdValidity(productId);
 
-  // TODO: empty cart
+  if (!isValidMongoId) {
+    return res.status(400).send({ message: "Invalid mongo id." });
+  }
+
   await Cart.updateOne(
     { buyerId: userId },
     {
       $pull: {
-        productList: {},
+        productList: { productId: new mongoose.Types.ObjectId(productId) },
       },
     }
   );
@@ -95,6 +101,45 @@ router.put("/cart/update/quantity/:id", isBuyer, async (req, res) => {
   );
 
   return res.status(200).send({ message: "Cart is updated successfully." });
+});
+
+router.get("/cart/details", isBuyer, async (req, res) => {
+  const loggedInUserId = req.loggedInUser._id;
+
+  let data = await Cart.aggregate([
+    {
+      $match: { buyerId: loggedInUserId },
+    },
+    {
+      $unwind: "$productList",
+    },
+    {
+      $lookup: {
+        from: "products",
+        localField: "productList.productId",
+        foreignField: "_id",
+        as: "productDetails",
+      },
+    },
+    {
+      $project: {
+        name: { $first: "$productDetails.name" },
+        company: { $first: "$productDetails.company" },
+        unitPrice: { $first: "$productDetails.price" },
+        availableQuantity: { $first: "$productDetails.quantity" },
+        orderQuantity: "$productList.quantity",
+        productId: { $first: "$productDetails._id" },
+      },
+    },
+  ]);
+
+  data = data.map((item) => {
+    const totalPrice = item.unitPrice * item.orderQuantity;
+
+    return { ...item, totalPrice };
+  });
+
+  return res.status(200).send(data);
 });
 
 export default router;
