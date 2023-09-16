@@ -9,6 +9,18 @@ const productSchema = new mongoose.Schema({
     trim: true,
     required: true,
   },
+
+  description: {
+    type: String,
+    minlength: 200,
+    maxlength: 1000,
+    trim: true,
+  },
+  imageUrl: {
+    type: String,
+    required: false,
+  },
+
   company: {
     type: String,
     minlength: 2,
