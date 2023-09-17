@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 });
 
 // database connection
-dbConnect();
+await dbConnect();
 
 // register routes
 app.use(userRoutes);
