@@ -7,6 +7,7 @@ import {
   getAllProducts,
   getSellerProducts,
   editProduct,
+  getLatestProducts,
 } from "./product.service.js";
 
 const router = express.Router();
@@ -30,5 +31,8 @@ router.post("/product/seller/all", isSeller, getSellerProducts);
 // seller
 // can edit own product
 router.put("/product/edit/:id", isSeller, editProduct);
+
+// get latest product
+router.get("/product/latest/:count", isUser, getLatestProducts);
 
 export default router;

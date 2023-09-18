@@ -43,3 +43,5 @@ export const getAllProductsValidation = Joi.object({
     )
   ),
 });
+
+export const countValidationSchema = Joi.number().integer().min(1).required();

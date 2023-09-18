@@ -3,6 +3,7 @@ import { Product } from "./product.entity.js";
 import { checkIfProductExists, isOwnerOfProduct } from "./product.functions.js";
 import {
   addProductValidationSchema,
+  countValidationSchema,
   getAllProductsValidation,
 } from "./product.validation.schema.js";
 
@@ -255,4 +256,30 @@ export const editProduct = async (req, res) => {
   );
 
   return res.status(200).send({ message: "Product is updated successfully." });
+};
+
+// get latest products
+export const getLatestProducts = async (req, res) => {
+  const count = req.params.count;
+
+  // validate count
+  try {
+    await countValidationSchema.validateAsync(count);
+  } catch (error) {
+    return res.status(400).send({ message: error.message });
+  }
+
+  const latestProducts = await Product.aggregate([
+    { $match: {} },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+    {
+      $limit: +count,
+    },
+  ]);
+
+  return res.status(200).send(latestProducts);
 };
